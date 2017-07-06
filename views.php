@@ -78,6 +78,30 @@ function wpds_floormaps() {
                     <table class="form-table">
                         <tr valign="top">
                         <input type="hidden" class="fm_add_dis" value="<?php echo $edit_data[0]->floormap; ?>"/>
+                        <?php
+                        global $wpdb;
+                        $name = $_GET['floormap_displays'];
+
+
+
+                        //echo "SELECT wpds_displays.name AS name FROM wpds_displays INNER JOIN wpds_floormaps ON wpds_displays.floormap = wpds_floormaps.floormap WHERE wpds_floormaps.id = $name";
+                         $result = $wpdb->get_results("SELECT wpds_displays.name AS name FROM wpds_displays INNER JOIN wpds_floormaps ON wpds_displays.floormap = wpds_floormaps.floormap WHERE wpds_floormaps.id = \"$name\"");
+                         //echo "$result";
+                         $i=0;
+                         while($result[$i] != '') {
+                           $a=$result[$i]->name;
+                           ?>
+
+
+                                     <th scope="row">
+                                         <label for="num_elements">
+                                             <?php
+                                             echo $a; ?> <br/> <?php
+                                                $i++;
+                                              ?>
+                                         </label>
+                                       </th>
+                                     <?php } ?>
 
                         <td>
                             <div id="floormap_dis" class="fm_add_div" style=""></div>
@@ -230,7 +254,7 @@ function wpds_add_display() {
                                 $fp_array[$i_fp]['floormap'] = $data->floormap;
                                 $i_fp++;
                             }
-                            ?><option value="0">None</option>                                  
+                            ?><option value="0">None</option>
                             <?php
                             foreach ($fp_array as $fp) {
                                 if (isset($_GET['edit_display'])) {
@@ -415,7 +439,7 @@ function wpds_group_display() {
 
 function wpds_add_group() {
     global $wpdb;
-    //-- Get the Display list 
+    //-- Get the Display list
     $table = 'wpds_displays';
     $get_tables = $wpdb->get_results("SELECT * FROM $table WHERE status='active'");
     $displays = array();
@@ -580,7 +604,7 @@ function wpds_events() {
 
 function wpds_add_event() {
     global $wpdb;
-    //-- Get the Display list 
+    //-- Get the Display list
     $table = 'wpds_displays';
     $get_tables = $wpdb->get_results("SELECT * FROM $table WHERE status='active'");
     $displays = array();
@@ -591,7 +615,7 @@ function wpds_add_event() {
         $i++;
     }
     //--------
-    ////-- Get the Groups list 
+    ////-- Get the Groups list
     $table = 'wpds_group_displays';
     $get_tables = $wpdb->get_results("SELECT * FROM $table WHERE status='active'");
     $groups = array();
@@ -662,8 +686,8 @@ function wpds_add_event() {
                         if ($edit_always_on) {
                             echo "disabled";
                         }
-                        ?>/></td>                  
-                </tr>                
+                        ?>/></td>
+                </tr>
                 <tr>  <th style="padding: 0%" scope="row"></th><td style="padding: 0px; padding-left: 1%;"><input type="checkbox" id="always_time" name="time_always" value="checked" <?php
                         if ($edit_always_on) {
                             echo "checked";
