@@ -224,9 +224,46 @@ include_once (dirname(__FILE__) . '/functions.php');
 include_once (dirname(__FILE__) . '/views.php');
 if (isset($_GET['page'])) {
     if ($_GET['page'] == 'wpds_display') {
+      // deleting selected display
+      if(isset($_GET['del_display']) && $_GET['del_display'] != '') {
+        global $wpdb;
+        $table_name = "wpds_displays";
+        $del = $_GET['del_display'];
+        $i=0;
+        $wpdb->delete($table_name, array('id' => $_GET['del_display']));
 
+        // deleting display from the corresponding groups
+        $results = $wpdb->get_results("SELECT display FROM wpds_group_displays");
+        while($results[$i]->display !='') {
+          //echo $results[$i]->display;
+          $del = $_GET['del_display'];
+        $result=unserialize($results[$i]->display);
+        if (($del = array_search($del, $result)) !== false) {
+        $del1 = $result[$del];
+        unset($result[$del]);
+      }
+      $results[$i] = serialize($result);
+      $wpdb->query("UPDATE wpds_group_displays SET display = '$results[$i]' WHERE display LIKE '%\"$del1\"%' LIMIT 1");
+      $i=$i+1;
     }
-//-- NEW DISPLAY fomr submitted
+      // deleting display from the corresponding events
+      $i=0;
+      $del = $_GET['del_display'];
+      $results =  $wpdb->get_results("SELECT displays FROM wpds_events");
+      while($results[$i]->displays !='') {
+        $del = $_GET['del_display'];
+      $result=unserialize($results[$i]->displays);
+      if (($del = array_search($del, $result)) !== false) {
+      $del1 = $result[$del];
+      unset($result[$del]);
+    }
+    $results[$i] = serialize($result);
+    $wpdb->query("UPDATE wpds_events SET displays = '$results[$i]' WHERE displays LIKE '%\"$del1\"%' LIMIT 1");
+    $i++;
+  }
+  }
+}
+//-- NEW DISPLAY form submitted
     else if ($_GET['page'] == 'wpds_add_display') {
         // Check if Form submited for new display and editted display
         if ($_POST['submit'] == 'Add Display' || $_POST['submit'] == 'Edit Display') {
@@ -255,7 +292,7 @@ if (isset($_GET['page'])) {
                 // ---- CHeck if display is being editted ----
                 if (isset($_GET['edit_display']) && $_GET['edit_display'] != '') {
                     $wpdb->update($table_name, array('name' => $name, 'location' => $location, 'floormap'=> $floormap,'lat' => $lat,'lng' => $lng, 'mac' => $mac, 'status' => $status,), array('id' => $_GET['edit_display']));
-                    //Update Event attached to this diaplay
+                    //Update Event attached to this display
                     $id = $_GET['edit_display'];
                     $group_query = $wpdb->get_results("select id from wpds_group_displays where display LIKE '%\"$id\"%'");
                     $id_array = array();
@@ -271,9 +308,58 @@ if (isset($_GET['page'])) {
                 } else {
                     $wpdb->insert($table_name, array('name' => $name, 'location' => $location, 'floormap'=> $floormap,'lat' => $lat,'lng' => $lng, 'mac' => $mac, 'status' => $status));
                 }
+
+            function admin_notice_success() {
+                ?>
+                <?php
+                $page = $_GET['page'];
+                $check_page = substr($page, 0, 8);
+                if (($check_page == 'wpds_add' || $check_page =='wpds_flo') && isset($_POST['submit'])) {
+                    ?>
+                    <div class="notice notice-success is-dismissible">
+                        <p>
+                            <?php
+                            if($check_page == 'wpds_flo')
+                                $page_type = 'FloorMaps';
+                            else
+                                $page_type = ucwords(substr($page, 9));
+                            if ((isset($_GET['edit_display']) && $_GET['edit_display'] != '') || (isset($_GET['edit_group']) && $_GET['edit_group'] != '') || (isset($_GET['edit_event']) && $_GET['edit_event'] != '')) {
+                                _e("$page_type editted succesfully!", 'sample-text-domain');
+                            } else {
+                                _e("$page_type added succesfully!", 'sample-text-domain');
+                            }
+                            ?></p>
+                    </div>
+                    <?php
+                }
             }
+          }
+            add_action('admin_notices', 'admin_notice_success');
         }
     }
+    else if ($_GET['page'] == 'wpds_group_display') {
+      if(isset($_GET['del_group']) && $_GET['del_group'] != '') {
+        global $wpdb;
+        $table_name = "wpds_group_displays";
+        $del = "gr_" . $_GET['del_group'];
+        $wpdb->delete($table_name, array('id' => $_GET['del_group']));
+
+        //deleting groups from corresponding events
+        $results = $wpdb->get_results("SELECT displays FROM wpds_events");
+        $i=0;
+        while($results[$i]->displays !='') {
+        $del = "gr_" . $_GET['del_group'];
+        $result=unserialize($results[$i]->displays);
+        if (($del = array_search($del, $result)) !== false) {
+        $del1 = $result[$del];
+        unset($result[$del]);
+      }
+      $results[$i] = serialize($result);
+      $wpdb->query("UPDATE wpds_events SET displays = '$results[$i]' WHERE displays LIKE '%\"$del1\"%' LIMIT 1");
+      $i++;
+    }
+  }
+}
 //--- NEW / EDIT GROUP form submitted
     else if ($_GET['page'] == 'wpds_add_group') {
         // Check if Form submited for new display and editted display
@@ -305,9 +391,44 @@ if (isset($_GET['page'])) {
                 } else {
                     $wpdb->insert($table_name, array('group_name' => $name, 'location' => $location, 'display' => $displays, 'status' => $status));
                 }
+                function admin_notice_success() {
+                    ?>
+                    <?php
+                    $page = $_GET['page'];
+                    $check_page = substr($page, 0, 8);
+                    if (($check_page == 'wpds_add' || $check_page =='wpds_flo') && isset($_POST['submit'])) {
+                        ?>
+                        <div class="notice notice-success is-dismissible">
+                            <p>
+                                <?php
+                                if($check_page == 'wpds_flo')
+                                    $page_type = 'FloorMaps';
+                                else
+                                    $page_type = ucwords(substr($page, 9));
+                                if ((isset($_GET['edit_display']) && $_GET['edit_display'] != '') || (isset($_GET['edit_group']) && $_GET['edit_group'] != '') || (isset($_GET['edit_event']) && $_GET['edit_event'] != '')) {
+                                    _e("$page_type editted succesfully!", 'sample-text-domain');
+                                } else {
+                                    _e("$page_type added succesfully!", 'sample-text-domain');
+                                }
+                                ?></p>
+                        </div>
+                        <?php
+                    }
+                }
+              }
+                add_action('admin_notices', 'admin_notice_success');
             }
-        }
-    } else if ($_GET['page'] == 'wpds_add_event') {
+
+    }
+    else if ($_GET['page'] == 'wpds_events') {
+      if(isset($_GET['del_event']) && $_GET['del_event'] != '') {
+        global $wpdb;
+        $table_name = "wpds_events";
+        $wpdb->delete($table_name, array('id' => $_GET['del_event']));
+      }
+
+    }
+    else if ($_GET['page'] == 'wpds_add_event') {
         if ($_POST['submit'] == 'Create Event' || $_POST['submit'] == 'Edit Event') {
 
             if ($_POST['event_name'] == '' || !(isset($_POST['displays_selected']))) {
@@ -342,9 +463,88 @@ if (isset($_GET['page'])) {
                     $wpdb->insert($table_name, array('name' => $name, 'slider' => $event_slider, 'time_from' => $time_from, 'time_to' => $time_to, 'displays' => $displays, 'status' => $status));
                 }
                 // ----- Confirmation messages ----
+                function admin_notice_success() {
+                    ?>
+                    <?php
+                    $page = $_GET['page'];
+                    $check_page = substr($page, 0, 8);
+                    if (($check_page == 'wpds_add' || $check_page =='wpds_flo') && isset($_POST['submit'])) {
+                        ?>
+                        <div class="notice notice-success is-dismissible">
+                            <p>
+                                <?php
+                                if($check_page == 'wpds_flo')
+                                    $page_type = 'FloorMaps';
+                                else
+                                    $page_type = ucwords(substr($page, 9));
+                                if ((isset($_GET['edit_display']) && $_GET['edit_display'] != '') || (isset($_GET['edit_group']) && $_GET['edit_group'] != '') || (isset($_GET['edit_event']) && $_GET['edit_event'] != '')) {
+                                    _e("$page_type editted succesfully!", 'sample-text-domain');
+                                } else {
+                                    _e("$page_type added succesfully!", 'sample-text-domain');
+                                }
+                                ?></p>
+                        </div>
+                        <?php
+                    }
+                }
+              }
+                add_action('admin_notices', 'admin_notice_success');
             }
-        }
-    } else if ($_GET['page'] == 'wpds_floormaps') {
+
+    }
+    //else if ($_GET['page'] == 'wpds_floormaps') {
+
+
+
+
+    //}
+    else if ($_GET['page'] == 'wpds_floormaps') {
+
+      if(isset($_GET['del_floormap']) && $_GET['del_floormap'] != '') {
+        global $wpdb;
+        $table_name = "wpds_floormaps";
+        $del = $_GET['del_floormap'];
+
+        $name = $wpdb->get_results("SELECT floormap FROM wpds_floormaps WHERE id = $del");
+        $a=$name[0]->floormap;
+
+        $wpdb->delete($table_name, array('id' => $_GET['del_floormap']));
+
+        $results = $wpdb->query("UPDATE wpds_displays SET floormap = '0' WHERE floormap LIKE \"$a\"");
+      }
+      /*if($_GET['new_fm'] == 'true' && $_GET['floormap_displays'] != '') {
+        global $wpdb;
+        $name = $_GET['floormap_displays'];
+
+
+
+        //echo "SELECT wpds_displays.name AS name FROM wpds_displays INNER JOIN wpds_floormaps ON wpds_displays.floormap = wpds_floormaps.floormap WHERE wpds_floormaps.id = $name";
+         $result = $wpdb->get_results("SELECT wpds_displays.name AS name FROM wpds_displays INNER JOIN wpds_floormaps ON wpds_displays.floormap = wpds_floormaps.floormap WHERE wpds_floormaps.id = \"$name\"");
+         //echo "$result";
+         $i=0;
+         while($result[$i] != '') {
+           $a=$result[$i]->name;
+           ?>
+           <div class ="wrap">
+             <h2>Displays Added on the FloorMap</h2>
+             <form method="post" action="">
+             <table class="form-table">
+                 <tr valign="top">
+                     <th scope="row">
+                         <label for="num_elements">
+                             <?php echo ".................";
+                             echo $a;
+                                $i++;
+                              ?>
+                         </label>
+                       </th>
+                     </tr>
+                   </table>
+                 </form>
+                </div>
+         <?php
+         }
+      }*/
 
         if ($_GET['new_fm'] == 'true' && ($_POST['submit'] == 'Add FloorMap' || $_POST['submit'] == 'Edit FloorMap')) {
 
@@ -383,12 +583,37 @@ if (isset($_GET['page'])) {
                 sleep(3);
                 $wpdb->insert($table_name, array('name' => $name, 'floormap' => $fm_name, 'status' => $status));
             }
-        }
+            function admin_notice_success() {
+                ?>
+                <?php
+                $page = $_GET['page'];
+                $check_page = substr($page, 0, 8);
+                if (($check_page == 'wpds_add' || $check_page =='wpds_flo') && isset($_POST['submit'])) {
+                    ?>
+                    <div class="notice notice-success is-dismissible">
+                        <p>
+                            <?php
+                            if($check_page == 'wpds_flo')
+                                $page_type = 'FloorMaps';
+                            else
+                                $page_type = ucwords(substr($page, 9));
+                            if ((isset($_GET['edit_display']) && $_GET['edit_display'] != '') || (isset($_GET['edit_group']) && $_GET['edit_group'] != '') || (isset($_GET['edit_event']) && $_GET['edit_event'] != '')) {
+                                _e("$page_type editted succesfully!", 'sample-text-domain');
+                            } else {
+                                _e("$page_type added succesfully!", 'sample-text-domain');
+                            }
+                            ?></p>
+                    </div>
+                    <?php
+                }
+            }
+          }
+            add_action('admin_notices', 'admin_notice_success');
     }
 }
 
 // ----- Confirmation messages for new or edit forms submission ----
-function admin_notice_success() {
+/*function admin_notice_success() {
     ?>
     <?php
     $page = $_GET['page'];
@@ -413,7 +638,7 @@ function admin_notice_success() {
     }
 }
 
-add_action('admin_notices', 'admin_notice_success');
+add_action('admin_notices', 'admin_notice_success');*/
 // ----- Confirmation messages ---- END
 //----- site_url required for Floormap display
 //if(!(isset($_GET['uid']))){
