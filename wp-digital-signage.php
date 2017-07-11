@@ -8,6 +8,9 @@
  * Author URI: http://baseapp.com
  * License: GPL2
  */
+ $path = plugin_dir_url(__FILE__);
+ echo "/usr/bin/php ".$path."cache.php '".$url."' ".$slider_alias;
+
  function myplugin_activate() {
      global $wpdb;
      $table_name=$wpdb->prefix."wpds_display";
@@ -213,15 +216,15 @@ class Wpds_Endpoints {
 
 add_action('cache_event' , 'create_cache_zip','10','2');
 function create_cache_zip($url,$slider_alias){
-    $path = get_home_path();
-    exec("/usr/bin/php ".$path."test.php '".$url."' ".$slider_alias);
+  $path = plugin_dir_url(__FILE__);
+  exec("/usr/bin/php ".$path."cache.php '".$url."' ".$slider_alias);
 }
 
 $api = new Wpds_Endpoints();
 $api->init();
 
-include_once (dirname(__FILE__) . '/functions.php');
-include_once (dirname(__FILE__) . '/views.php');
+include_once (dirname(__FILE__) . '/controller/functions.php');
+include_once (dirname(__FILE__) . '/view/views.php');
 if (isset($_GET['page'])) {
     if ($_GET['page'] == 'wpds_display') {
       // deleting selected display
