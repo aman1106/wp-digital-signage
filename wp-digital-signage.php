@@ -8,9 +8,7 @@
  * Author URI: http://baseapp.com
  * License: GPL2
  */
- $path = plugin_dir_url(__FILE__);
- echo "/usr/bin/php ".$path."cache.php '".$url."' ".$slider_alias;
-
+ 
  function myplugin_activate() {
      global $wpdb;
      $table_name=$wpdb->prefix."wpds_display";
