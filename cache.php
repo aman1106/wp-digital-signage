@@ -42,6 +42,12 @@ $list = $matches[0];
 //print_r($matches);
 //var_dump($matches);
 
+
+
+
+
+
+
 $domain = $ur[0];
 foreach ($list as $url){
 $edit_url = explode('?ver',$url);
