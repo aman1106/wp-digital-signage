@@ -13,7 +13,7 @@ if (!class_exists('WP_List_Table')) {
 }
 
 class My_List_Table extends WP_List_Table {
-
+    //creating table for displaying displays
     function get_columns() {
         $columns = array(
             'cb' => '<input type="checkbox" />',
@@ -21,7 +21,6 @@ class My_List_Table extends WP_List_Table {
             'name' => 'Name',
             'location' => 'Location',
             'mac' => 'Mac',
-            //'guid' => 'Link',
             'status' => 'Status',
         );
         return $columns;
@@ -47,6 +46,7 @@ class My_List_Table extends WP_List_Table {
         if ('delete' === $this->current_action()) {
             foreach ($_POST['display'] as $display) {
                 global $wpdb;
+                //deleting selected display from the table
                 $delete = $wpdb->delete("wpds_displays", array('id' => $display));
                 if (!$delete) {
                     ?>
@@ -66,17 +66,14 @@ class My_List_Table extends WP_List_Table {
     }
 
     function prepare_items_wpds($a) {
-        //$this->search_box('search', 'search_id');
         $this->process_bulk_action();
         $columns = $this->get_columns();
         $hidden = array();
         $sortable = $this->get_sortable_columns();
         $this->_column_headers = array($columns, $hidden, $sortable);
 
-        // $this->items = $a;
-
         usort($a, array(&$this, 'usort_reorder'));
-//$this->items = $a;
+
         $per_page = 10;
         $current_page = $this->get_pagenum();
         $total_items = count($a);
@@ -87,20 +84,15 @@ class My_List_Table extends WP_List_Table {
             'per_page' => $per_page //WE have to determine how many items to show on a page
         ));
         $this->items = $found_data;
-        //var_dump($this->items);
         global $query_string;
-
-       $query_args = explode("&", $query_string);
+        $query_args = explode("&", $query_string);
         $search_query = array();
-
         foreach ($query_args as $key => $string) {
             $query_split = explode("=", $string);
             $search_query[$query_split[0]] = urldecode($query_split[1]);
-        } // foreach
+        }
 
         $search = new WP_Query($search_query);
-
-        // print_r($_POST);
     }
 
     function column_default($item, $column_name) {
@@ -109,7 +101,6 @@ class My_List_Table extends WP_List_Table {
             case 'name':
             case 'location':
             case 'mac':
-            //case 'guid':
             case 'status':
                 return $item[$column_name];
             default:
@@ -123,7 +114,6 @@ class My_List_Table extends WP_List_Table {
             'name' => array('name', false),
             'location' => array('location', false),
             'mac' => array('mac', false),
-            //'guid' => array('guid', false),
             'status' => array('status', false),
         );
         return $sortable_columns;

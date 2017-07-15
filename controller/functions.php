@@ -70,20 +70,16 @@ function display_main() {
     add_filter('posts_groupby', 'get_custom_field_posts_group');
     if (!(empty($_POST['s']))) {
 
-        //   global $post, $current_post_id;
-
         function filter_where($where = '') {
 
             $title = $_POST['s'];
             $where .= "AND post_title LIKE '%$title%' OR post_content LIKE '%$title%'";
-            //echo $where;
             return $where;
         }
 
         add_filter('posts_where', 'filter_where');
 
         $customPosts = new WP_Query();
-        // print_r($customPosts);
     }
     if ($current_user->caps['administrator'] == '1')
         $customPosts->query('posts_per_page=-1');
@@ -91,16 +87,14 @@ function display_main() {
         $customPosts->query('&author=' . $current_user->ID . '&posts_per_page=-1');
     remove_filter('posts_join', 'get_custom_field_posts_join');
     remove_filter('posts_groupby', 'get_custom_field_posts_group');
-    // print_r($customPosts);
     $arr = array();
-    // global $a;
     $a = array();
     $i = 0;
     while ($customPosts->have_posts()) : $customPosts->the_post(); // Inserting values in table
         $arr['ID'] = get_the_ID();
 
         //-------------------Getting Display Name -----------------------------------------
-        //$arr['guid'] = get_permalink();
+        
         $arr['status'] = get_post_status(get_the_ID());
         $arr['author'] = get_the_author();
 

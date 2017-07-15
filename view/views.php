@@ -14,10 +14,10 @@ function wpds_floormaps() {
         $edit_data = $wpdb->get_results("SELECT * FROM $table_name WHERE id=$id");
     }
     if ((isset($_GET['new_fm'])) && $_GET['new_fm'] && !(isset($_GET['floormap_displays']))) {
+      //add new floormap
         ?>
         <div class="wrap">
             <h2>Add New FloorMap</h2>
-
             <form method="post" action="" enctype="multipart/form-data">
                 <?php settings_fields('wpds_floormaps'); ?>
                 <?php do_settings_sections('wpds_floormaps'); ?>

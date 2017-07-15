@@ -15,7 +15,7 @@ if (!class_exists('WP_List_Table')) {
 }
 
 class My_List_Table extends WP_List_Table {
-
+    //creating table for displaying Floormaps
     function get_columns() {
         $columns = array(
             'cb' => '<input type="checkbox" />',
@@ -48,6 +48,7 @@ class My_List_Table extends WP_List_Table {
         if ('delete' === $this->current_action()) {
             foreach ($_POST['floormap'] as $floormap) {
                 global $wpdb;
+                //deleting selected floormap from table
               $delete = $wpdb->delete("wpds_floormaps", array('id' => $floormap));
                 if (!$delete) {
                     ?>
@@ -67,17 +68,14 @@ class My_List_Table extends WP_List_Table {
     }
 
     function prepare_items_wpds($a) {
-        //$this->search_box('search', 'search_id');
         $this->process_bulk_action();
         $columns = $this->get_columns();
         $hidden = array();
         $sortable = $this->get_sortable_columns();
         $this->_column_headers = array($columns, $hidden, $sortable);
 
-        // $this->items = $a;
 
         usort($a, array(&$this, 'usort_reorder'));
-//$this->items = $a;
         $per_page = 10;
         $current_page = $this->get_pagenum();
         $total_items = count($a);
@@ -99,8 +97,6 @@ class My_List_Table extends WP_List_Table {
         } // foreach
 
         $search = new WP_Query($search_query);
-
-        // print_r($_POST);
     }
 
     function column_default($item, $column_name) {
@@ -112,7 +108,6 @@ class My_List_Table extends WP_List_Table {
             case 'displays':
                 return $item[$column_name];
             case 'floormap':
-               // return print_r($item, true);
                 return '<img src="'.get_site_url().''.$url.'" width="200" height="100" />';
             default:
                 return print_r($item, true); //Show the whole array for troubleshooting purposes

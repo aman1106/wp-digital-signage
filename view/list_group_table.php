@@ -15,7 +15,7 @@ if (!class_exists('WP_List_Table')) {
 }
 
 class My_List_Table extends WP_List_Table {
-
+    //creating table for displaying groups
     function get_columns() {
         $columns = array(
             'cb' => '<input type="checkbox" />',
@@ -48,6 +48,7 @@ class My_List_Table extends WP_List_Table {
         if ('delete' === $this->current_action()) {
             foreach ($_POST['group'] as $group) {
                 global $wpdb;
+                //deleting selected groups from the table
               $delete = $wpdb->delete("wpds_group_displays", array('id' => $group));
                 if (!$delete) {
                     ?>
@@ -67,17 +68,14 @@ class My_List_Table extends WP_List_Table {
     }
 
     function prepare_items_wpds($a) {
-        //$this->search_box('search', 'search_id');
         $this->process_bulk_action();
         $columns = $this->get_columns();
         $hidden = array();
         $sortable = $this->get_sortable_columns();
         $this->_column_headers = array($columns, $hidden, $sortable);
 
-        // $this->items = $a;
 
         usort($a, array(&$this, 'usort_reorder'));
-//$this->items = $a;
         $per_page = 10;
         $current_page = $this->get_pagenum();
         $total_items = count($a);
@@ -99,8 +97,6 @@ class My_List_Table extends WP_List_Table {
         } // foreach
 
         $search = new WP_Query($search_query);
-
-        // print_r($_POST);
     }
 
     function column_default($item, $column_name) {
@@ -122,7 +118,6 @@ class My_List_Table extends WP_List_Table {
             'group_name' => array('name', false),
             'location' => array('location', false),
             'displays' => array('displays', false),
-            //'guid' => array('guid', false),
             'status' => array('status', false),
         );
         return $sortable_columns;

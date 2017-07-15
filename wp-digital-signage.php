@@ -8,83 +8,8 @@
  * Author URI: http://baseapp.com
  * License: GPL2
  */
- 
- function myplugin_activate() {
-     global $wpdb;
-     $table_name=$wpdb->prefix."wpds_display";
-     if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name) {
-     //table not in database. Create new table
-     $charset_collate = $wpdb->get_charset_collate();
 
-     $sql = "CREATE TABLE `wpds_displays` (
-  `id` int(9) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(40) COLLATE utf8_unicode_ci NOT NULL,
-  `location` varchar(40) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `mac` varchar(40) COLLATE utf8_unicode_ci NOT NULL,
-  `floormap` varchar(50) COLLATE utf8_unicode_ci NOT NULL DEFAULT '0',
-  `lat` int(11) NOT NULL DEFAULT '0',
-  `lng` int(11) NOT NULL DEFAULT '0',
-  `status` enum('active','disabled') COLLATE utf8_unicode_ci DEFAULT 'active',
-  PRIMARY KEY (`id`)
-) $charset_collate;";
-     require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
-     dbDelta( $sql );
-     }
-
-
-     $table_name=$wpdb->prefix."wpds_events";
-     if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name) {
-       $charset_collate = $wpdb->get_charset_collate();
-
-       $sql = "CREATE TABLE `wpds_events` (
-  `id` int(9) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(40) COLLATE utf8_unicode_ci NOT NULL,
-  `slider` varchar(80) COLLATE utf8_unicode_ci NOT NULL,
-  `time_from` datetime DEFAULT NULL,
-  `time_to` datetime DEFAULT NULL,
-  `displays` varchar(80) COLLATE utf8_unicode_ci NOT NULL,
-  `updated` int(5) NOT NULL DEFAULT '0',
-  `status` enum('active','disabled') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'active',
-  PRIMARY KEY (`id`)
-) $charset_collate;";
-      require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
-      dbDelta( $sql );
-     }
-
-
-     $table_name=$wpdb->prefix."wpds_floormaps";
-     if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name) {
-       $charset_collate = $wpdb->get_charset_collate();
-
-       $sql = "CREATE TABLE `wpds_floormaps` (
-  `id` int(5) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(25) COLLATE utf8_unicode_ci NOT NULL,
-  `floormap` varchar(25) COLLATE utf8_unicode_ci NOT NULL,
-  `status` enum('active','disabled') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'active',
-  PRIMARY KEY (`id`)
-) $charset_collate;";
-      require_once(ABSPATH . 'wp-admin/includes/upgrade.php' );
-      dbDelta( $sql );
-    }
-
-
-    $table_name=$wpdb->prefix."wpds_floormaps";
-    if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name) {
-      $charset_collate = $wpdb->get_charset_collate();
-
-      $sql = "CREATE TABLE `wpds_group_displays` (
-  `id` int(9) unsigned NOT NULL AUTO_INCREMENT,
-  `group_name` varchar(40) COLLATE utf8_unicode_ci NOT NULL,
-  `location` varchar(40) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `display` varchar(80) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `status` enum('active','disabled') COLLATE utf8_unicode_ci DEFAULT 'active',
-  PRIMARY KEY (`id`)
-) $charset_collate;";
-      require_once(ABSPATH . 'wp-admin/includes/upgrade.php' );
-      dbDelta( $sql );
-    }
-}
-register_activation_hook( __FILE__, 'myplugin_activate' );
+include_once (plugin_dir_path(__FILE__) . 'wp_database_table.php');
 //add_action('activated_plugin','myplugin_activate')
 if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly
@@ -213,6 +138,7 @@ class Wpds_Endpoints {
 }
 
 add_action('cache_event' , 'create_cache_zip','10','2');
+//creating cache zip
 function create_cache_zip($url,$slider_alias){
   $path = plugin_dir_url(__FILE__);
   exec("/usr/bin/php ".$path."cache.php '".$url."' ".$slider_alias);
@@ -231,12 +157,12 @@ if (isset($_GET['page'])) {
         $table_name = "wpds_displays";
         $del = $_GET['del_display'];
         $i=0;
+        //deleting display from display table
         $wpdb->delete($table_name, array('id' => $_GET['del_display']));
 
         // deleting display from the corresponding groups
         $results = $wpdb->get_results("SELECT display FROM wpds_group_displays");
         while($results[$i]->display !='') {
-          //echo $results[$i]->display;
           $del = $_GET['del_display'];
         $result=unserialize($results[$i]->display);
         if (($del = array_search($del, $result)) !== false) {
@@ -244,6 +170,7 @@ if (isset($_GET['page'])) {
         unset($result[$del]);
       }
       $results[$i] = serialize($result);
+      //updating table after deletion
       $wpdb->query("UPDATE wpds_group_displays SET display = '$results[$i]' WHERE display LIKE '%\"$del1\"%' LIMIT 1");
       $i=$i+1;
     }
@@ -259,6 +186,7 @@ if (isset($_GET['page'])) {
       unset($result[$del]);
     }
     $results[$i] = serialize($result);
+    //updating table after deletion
     $wpdb->query("UPDATE wpds_events SET displays = '$results[$i]' WHERE displays LIKE '%\"$del1\"%' LIMIT 1");
     $i++;
   }
@@ -340,6 +268,7 @@ if (isset($_GET['page'])) {
     }
     else if ($_GET['page'] == 'wpds_group_display') {
       if(isset($_GET['del_group']) && $_GET['del_group'] != '') {
+        //deleting group from the table
         global $wpdb;
         $table_name = "wpds_group_displays";
         $del = "gr_" . $_GET['del_group'];
@@ -423,6 +352,7 @@ if (isset($_GET['page'])) {
     }
     else if ($_GET['page'] == 'wpds_events') {
       if(isset($_GET['del_event']) && $_GET['del_event'] != '') {
+        //deleting event from the table
         global $wpdb;
         $table_name = "wpds_events";
         $wpdb->delete($table_name, array('id' => $_GET['del_event']));
@@ -502,6 +432,7 @@ if (isset($_GET['page'])) {
     else if ($_GET['page'] == 'wpds_floormaps') {
 
       if(isset($_GET['del_floormap']) && $_GET['del_floormap'] != '') {
+        //deleting floormap from the table
         global $wpdb;
         $table_name = "wpds_floormaps";
         $del = $_GET['del_floormap'];
@@ -510,53 +441,19 @@ if (isset($_GET['page'])) {
         $a=$name[0]->floormap;
 
         $wpdb->delete($table_name, array('id' => $_GET['del_floormap']));
-
+        //updating the corresponding display in the display table
         $results = $wpdb->query("UPDATE wpds_displays SET floormap = '0' WHERE floormap LIKE \"$a\"");
       }
-      /*if($_GET['new_fm'] == 'true' && $_GET['floormap_displays'] != '') {
-        global $wpdb;
-        $name = $_GET['floormap_displays'];
-
-
-
-        //echo "SELECT wpds_displays.name AS name FROM wpds_displays INNER JOIN wpds_floormaps ON wpds_displays.floormap = wpds_floormaps.floormap WHERE wpds_floormaps.id = $name";
-         $result = $wpdb->get_results("SELECT wpds_displays.name AS name FROM wpds_displays INNER JOIN wpds_floormaps ON wpds_displays.floormap = wpds_floormaps.floormap WHERE wpds_floormaps.id = \"$name\"");
-         //echo "$result";
-         $i=0;
-         while($result[$i] != '') {
-           $a=$result[$i]->name;
-           ?>
-           <div class ="wrap">
-             <h2>Displays Added on the FloorMap</h2>
-             <form method="post" action="">
-             <table class="form-table">
-                 <tr valign="top">
-                     <th scope="row">
-                         <label for="num_elements">
-                             <?php echo ".................";
-                             echo $a;
-                                $i++;
-                              ?>
-                         </label>
-                       </th>
-                     </tr>
-                   </table>
-                 </form>
-                </div>
-         <?php
-         }
-      }*/
-
-        if ($_GET['new_fm'] == 'true' && ($_POST['submit'] == 'Add FloorMap' || $_POST['submit'] == 'Edit FloorMap')) {
+              if ($_GET['new_fm'] == 'true' && ($_POST['submit'] == 'Add FloorMap' || $_POST['submit'] == 'Edit FloorMap')) {
 
             $table_name = 'wpds_floormaps';
             $name = $_POST['name'];
             $floormap = $_POST['floormap'];
             $status = $_POST['status'];
             $create = true;
-            //var_dump($_FILES);
-            //var_dump($_POST);
+
             if ($_FILES['floormap']['tmp_name'] != '') {
+              //uploading floormap file
                 $upload_dir = wp_upload_dir();
                 move_uploaded_file($_FILES['floormap']['tmp_name'], $upload_dir['basedir'] . '/fm-' . $_FILES['floormap']['name']);
                 $fm_name = $_FILES['floormap']['name'];
@@ -576,6 +473,7 @@ if (isset($_GET['page'])) {
                 $fm_id = $_GET['edit_floormap'];
 
                  if ($_FILES['floormap']['name'] == '')
+                 //updating floormap table
                      $wpdb->update($table_name, array('name' => $name, 'status' => $status), array('id' => $fm_id));
                  else
                     $wpdb->update($table_name, array('name' => $name, 'floormap' => $fm_name, 'status' => $status), array('id' => $fm_id));
@@ -614,35 +512,9 @@ if (isset($_GET['page'])) {
 }
 
 // ----- Confirmation messages for new or edit forms submission ----
-/*function admin_notice_success() {
-    ?>
-    <?php
-    $page = $_GET['page'];
-    $check_page = substr($page, 0, 8);
-    if (($check_page == 'wpds_add' || $check_page =='wpds_flo') && isset($_POST['submit'])) {
-        ?>
-        <div class="notice notice-success is-dismissible">
-            <p>
-                <?php
-                if($check_page == 'wpds_flo')
-                    $page_type = 'FloorMaps';
-                else
-                    $page_type = ucwords(substr($page, 9));
-                if ((isset($_GET['edit_display']) && $_GET['edit_display'] != '') || (isset($_GET['edit_group']) && $_GET['edit_group'] != '') || (isset($_GET['edit_event']) && $_GET['edit_event'] != '')) {
-                    _e("$page_type editted succesfully!", 'sample-text-domain');
-                } else {
-                    _e("$page_type added succesfully!", 'sample-text-domain');
-                }
-                ?></p>
-        </div>
-        <?php
-    }
-}
 
-add_action('admin_notices', 'admin_notice_success');*/
 // ----- Confirmation messages ---- END
 //----- site_url required for Floormap display
-//if(!(isset($_GET['uid']))){
 if(!(isset($_GET['uid'])) && $_GET['page']=='wpds_add_display'  ){  ?>
 <script type="text/javascript">
     var site_url = '<?php echo get_site_url(); ?>';

@@ -16,6 +16,7 @@ if (!class_exists('WP_List_Table')) {
 
 class My_List_Table extends WP_List_Table {
 
+    //creating table for displaying events
     function get_columns() {
         $columns = array(
             'cb' => '<input type="checkbox" />',
@@ -45,10 +46,10 @@ class My_List_Table extends WP_List_Table {
     }
 
     function process_bulk_action() {
-
         if ('delete' === $this->current_action()) {
             foreach ($_POST['event'] as $event) {
                 global $wpdb;
+                //deleting selected event from table
               $delete = $wpdb->delete("wpds_events", array('id' => $event));
                 if (!$delete) {
                     ?>
@@ -68,17 +69,14 @@ class My_List_Table extends WP_List_Table {
     }
 
     function prepare_items_wpds($a) {
-        //$this->search_box('search', 'search_id');
         $this->process_bulk_action();
         $columns = $this->get_columns();
         $hidden = array();
         $sortable = $this->get_sortable_columns();
         $this->_column_headers = array($columns, $hidden, $sortable);
 
-        // $this->items = $a;
-
         usort($a, array(&$this, 'usort_reorder'));
-//$this->items = $a;
+
         $per_page = 10;
         $current_page = $this->get_pagenum();
         $total_items = count($a);
@@ -100,8 +98,6 @@ class My_List_Table extends WP_List_Table {
         } // foreach
 
         $search = new WP_Query($search_query);
-
-        // print_r($_POST);
     }
 
     function column_default($item, $column_name) {
@@ -124,7 +120,6 @@ class My_List_Table extends WP_List_Table {
             'event_name' => array('event_name', false),
             'slider' => array('slider', false),
             'displays' => array('displays', false),
-            //'guid' => array('guid', false),
             'status' => array('status', false),
         );
         return $sortable_columns;

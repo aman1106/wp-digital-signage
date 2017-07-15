@@ -3,7 +3,7 @@
 //$domain = 'http://avuitycms.com/';
 $domain = $argv[1];
 $ur = explode('api-get-slider',$domain);
-var_dump($ur);
+//var_dump($ur);
 //die();
 
 $slider_alias = $argv[2];
@@ -41,13 +41,6 @@ $list = $matches[0];
 
 //print_r($matches);
 //var_dump($matches);
-
-
-
-
-
-
-
 $domain = $ur[0];
 foreach ($list as $url){
 $edit_url = explode('?ver',$url);
