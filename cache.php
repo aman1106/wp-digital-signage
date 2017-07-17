@@ -1,10 +1,7 @@
 <?php
 
-//$domain = 'http://avuitycms.com/';
 $domain = $argv[1];
 $ur = explode('api-get-slider',$domain);
-//var_dump($ur);
-//die();
 
 $slider_alias = $argv[2];
 
@@ -39,8 +36,6 @@ $urls = preg_match_all('#\bhttps?://[^\s()<>]+(?:\([\w\d]+\)|([^[:punct:]\s]|/))
 
 $list = $matches[0];
 
-//print_r($matches);
-//var_dump($matches);
 $domain = $ur[0];
 foreach ($list as $url){
 $edit_url = explode('?ver',$url);
@@ -94,26 +89,17 @@ $url = $edit_url[0];
 
                         file_put_contents("cache/assets/css/$base",file_get_contents($url));
 
-//$new_content =        preg_replace($url,$domain.'cache/assets/css/'.$base,$content);
 $content = str_replace($url,$domain.'cache/assets/css/'.$base,$content);
-//file_put_contents("cache/index.html",$content);
-//die();
-
         }
         else if(preg_match('/\.js/',basename($url))){
                 file_put_contents("cache/assets/js/$base",file_get_contents($url));
 $content = str_replace($url,$domain.'cache/assets/js/'.$base,$content);
-//file_put_contents("cache/index.html",$content);
-
         }
         else if(preg_match('/\.(bmp|jpeg|gif|png|jpg)/',basename($url))){
                 file_put_contents("cache/assets/images/$base",file_get_contents($url));
 $content = str_replace($url,$domain.'cache/assets/images/'.$base,$content);
-//file_put_contents("cache/index.html",$content);
-
         }
         echo '<br />';
-//      file_put_contents("cache/assets/
 }
 
 file_put_contents("cache/index.html",$content);

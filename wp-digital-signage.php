@@ -64,7 +64,6 @@ class Wpds_Endpoints {
             die();
         }
         if (!empty($wp->query_vars['wpds_display'])) {
-            //$wp->query_vars['wpds_display'];
 
             do_action('wpds_action_display');
             die();
@@ -132,7 +131,6 @@ class Wpds_Endpoints {
             'cache_url' => "http://avuitycms.com/cache-$slider_alias.zip"
         ]);
 
-        //$wpdb->update('wpds_events', array('updated'=> '0'), array('id' => $event_id));
     }
 
 }
@@ -170,7 +168,7 @@ if (isset($_GET['page'])) {
         unset($result[$del]);
       }
       $results[$i] = serialize($result);
-      //updating table after deletion
+      // updating table after deletion
       $wpdb->query("UPDATE wpds_group_displays SET display = '$results[$i]' WHERE display LIKE '%\"$del1\"%' LIMIT 1");
       $i=$i+1;
     }
@@ -186,7 +184,7 @@ if (isset($_GET['page'])) {
       unset($result[$del]);
     }
     $results[$i] = serialize($result);
-    //updating table after deletion
+    // updating table after deletion
     $wpdb->query("UPDATE wpds_events SET displays = '$results[$i]' WHERE displays LIKE '%\"$del1\"%' LIMIT 1");
     $i++;
   }
@@ -423,12 +421,7 @@ if (isset($_GET['page'])) {
             }
 
     }
-    //else if ($_GET['page'] == 'wpds_floormaps') {
-
-
-
-
-    //}
+    
     else if ($_GET['page'] == 'wpds_floormaps') {
 
       if(isset($_GET['del_floormap']) && $_GET['del_floormap'] != '') {

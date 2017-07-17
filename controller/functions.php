@@ -33,7 +33,6 @@ add_action('admin_menu', 'wpds_settings_page');
 
 function wpds_settings_page() {
     // Plugin Menu Pages
-    //add_menu_page('Alert Plugin', 'Alert', 'delete_others_pages', 'wpds_display', 'wpds_display')
     add_menu_page('Digital Signage WordPress Plugin', 'Digital Signage', 'delete_others_pages', 'wpds_display', 'wpds_display');
     add_submenu_page('wpds_display', 'Add a Display Device', 'Add Display', 'delete_others_pages', 'wpds_add_display', 'wpds_add_display');
     add_submenu_page('wpds_display', 'wpds_display', 'Display Groups Manager', 'delete_others_pages', 'wpds_group_display', 'wpds_group_display');
@@ -94,7 +93,7 @@ function display_main() {
         $arr['ID'] = get_the_ID();
 
         //-------------------Getting Display Name -----------------------------------------
-        
+
         $arr['status'] = get_post_status(get_the_ID());
         $arr['author'] = get_the_author();
 
