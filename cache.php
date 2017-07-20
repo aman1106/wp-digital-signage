@@ -88,7 +88,6 @@ $url = $edit_url[0];
                 }
 
                         file_put_contents("cache/assets/css/$base",file_get_contents($url));
-
 $content = str_replace($url,$domain.'cache/assets/css/'.$base,$content);
         }
         else if(preg_match('/\.js/',basename($url))){

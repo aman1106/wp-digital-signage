@@ -76,6 +76,7 @@ class Wpds_Endpoints {
     public static function get_display() {
         global $wpdb, $wp;
         $display_mac = $wp->query_vars['wpds_display'];
+        // Selecting data from the wpds displays table
         $query = "select * from wpds_displays where mac = '$display_mac' AND status='active'";
         $result = $wpdb->get_results($query);
         //------FOUND DISPLAY
@@ -107,6 +108,7 @@ class Wpds_Endpoints {
 
             }
             $slider_id = $event_query[0]->slider;
+            // Selecting slider alias from table revslider_sliders
             $get_slider_alias = $wpdb->get_results("select alias from " . $wpdb->prefix . "revslider_sliders where id = '$slider_id'");
             $slider_alias = $get_slider_alias[0]->alias;
             $event_status = $event_query[0]->updated;
@@ -144,7 +146,9 @@ function create_cache_zip($url,$slider_alias){
 
 $api = new Wpds_Endpoints();
 $api->init();
-
+/*
+* Including the files needed
+*/
 include_once (dirname(__FILE__) . '/controller/functions.php');
 include_once (dirname(__FILE__) . '/view/views.php');
 if (isset($_GET['page'])) {
@@ -195,7 +199,9 @@ if (isset($_GET['page'])) {
         // Check if Form submited for new display and editted display
         if ($_POST['submit'] == 'Add Display' || $_POST['submit'] == 'Edit Display') {
             if ($_POST['display_name'] == '' || $_POST['display_mac'] == '' || $_POST['display_floormap'] == '') {
-
+                /*
+                * Function to display the error message
+                */
                 function admin_notice_fail() {
                     ?>
                     <div class="notice notice-error is-dismissible">
@@ -235,13 +241,15 @@ if (isset($_GET['page'])) {
                 } else {
                     $wpdb->insert($table_name, array('name' => $name, 'location' => $location, 'floormap'=> $floormap,'lat' => $lat,'lng' => $lng, 'mac' => $mac, 'status' => $status));
                 }
-
+            /*
+            * Function to display the success message
+            */
             function admin_notice_success() {
                 ?>
                 <?php
                 $page = $_GET['page'];
                 $check_page = substr($page, 0, 8);
-                if (($check_page == 'wpds_add' || $check_page =='wpds_flo') && isset($_POST['submit'])) {
+                if (($check_page == 'wpds_add' || $check_page =='wpds_flo') && isset($_POST['submit'])) { // checking the condition for the success
                     ?>
                     <div class="notice notice-success is-dismissible">
                         <p>
@@ -251,9 +259,9 @@ if (isset($_GET['page'])) {
                             else
                                 $page_type = ucwords(substr($page, 9));
                             if ((isset($_GET['edit_display']) && $_GET['edit_display'] != '') || (isset($_GET['edit_group']) && $_GET['edit_group'] != '') || (isset($_GET['edit_event']) && $_GET['edit_event'] != '')) {
-                                _e("$page_type editted succesfully!", 'sample-text-domain');
+                                _e("$page_type editted succesfully!", 'sample-text-domain'); // display message for editing succesfully
                             } else {
-                                _e("$page_type added succesfully!", 'sample-text-domain');
+                                _e("$page_type added succesfully!", 'sample-text-domain'); // display message for adding succesfully
                             }
                             ?></p>
                     </div>
@@ -283,6 +291,7 @@ if (isset($_GET['page'])) {
         unset($result[$del]);
       }
       $results[$i] = serialize($result);
+      // updating the events table
       $wpdb->query("UPDATE wpds_events SET displays = '$results[$i]' WHERE displays LIKE '%\"$del1\"%' LIMIT 1");
       $i++;
     }
@@ -421,7 +430,7 @@ if (isset($_GET['page'])) {
             }
 
     }
-    
+
     else if ($_GET['page'] == 'wpds_floormaps') {
 
       if(isset($_GET['del_floormap']) && $_GET['del_floormap'] != '') {

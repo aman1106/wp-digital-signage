@@ -34,6 +34,7 @@ add_action('admin_menu', 'wpds_settings_page');
 function wpds_settings_page() {
     // Plugin Menu Pages
     add_menu_page('Digital Signage WordPress Plugin', 'Digital Signage', 'delete_others_pages', 'wpds_display', 'wpds_display');
+    // Plugin Submenus
     add_submenu_page('wpds_display', 'Add a Display Device', 'Add Display', 'delete_others_pages', 'wpds_add_display', 'wpds_add_display');
     add_submenu_page('wpds_display', 'wpds_display', 'Display Groups Manager', 'delete_others_pages', 'wpds_group_display', 'wpds_group_display');
     add_submenu_page('wpds_display', 'Create a New Display Group', 'Create Display Group', 'delete_others_pages', 'wpds_add_group', 'wpds_add_group');
@@ -47,7 +48,9 @@ function wpds_settings_page() {
  * Plugin Settings  Group
  */
 add_action('admin_init', 'wpds_settings');
-
+/*
+* Setting function
+*/
 function wpds_settings() {
     register_setting('wpds_display_group', 'display_name');
     register_setting('wpds_display_group', 'display_location');
@@ -136,9 +139,11 @@ function wpds_get_display_name($id_array) {
     foreach ($id_array as $id) {
         if (strstr($id, 'gr_') != FALSE) {
             $id = substr($id, 3);
+            // Selecting group name from the table wpds_group_displays
             $get_gr_name = $wpdb->get_results("SELECT group_name FROM $table_name_gr WHERE id = '$id'");
             $display_names[$i] = $get_gr_name[0]->group_name . ' (Group)';
         } else {
+            // Selecting display name from the table wpds displays
             $get_name = $wpdb->get_results("SELECT name FROM $table_name WHERE id = '$id'");
             $display_names[$i] = $get_name[0]->name;
         }
