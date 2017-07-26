@@ -41,7 +41,7 @@ function wpds_settings_page() {
     add_submenu_page('wpds_display', 'Events Manager', 'Events Manager', 'delete_others_pages', 'wpds_events', 'wpds_events');
     add_submenu_page('wpds_display', 'Create a New Event', 'Add New Event', 'delete_others_pages', 'wpds_add_event', 'wpds_add_event');
     add_submenu_page('wpds_display', 'FloorMaps Managment', 'FloorMaps', 'delete_others_pages', 'wpds_floormaps', 'wpds_floormaps');
-    add_submenu_page('wpds_display', 'Alert Management', 'Alerts', 'delete_others_pages', 'wpds_alerts', 'wpds_alerts');
+    add_submenu_page('wpds_display', 'Alerts', 'Alerts', 'delete_others_pages', 'wpds_alerts', 'wpds_alerts');
 }
 
 /*

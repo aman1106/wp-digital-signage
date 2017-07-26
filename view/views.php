@@ -706,6 +706,186 @@ function wpds_add_event() {
     </div> <?php
 }
 
+function wpds_alerts() {
+    global $wpdb;
+    global $customFields;
+    global $current_user;
+
+    if (!(isset($_POST['s'])) || empty($_POST['s']))
+        $customPosts = new WP_Query();
+
+    add_filter('posts_join', 'get_custom_field_posts_join');
+    add_filter('posts_groupby', 'get_custom_field_posts_group');
+    if ((isset($_GET['new_al'])) && $_GET['new_al'] ) {
+      global $wpdb;
+      //-- Get the Display list
+      $table = 'wpds_displays';
+      $get_tables = $wpdb->get_results("SELECT * FROM $table WHERE status='active'");
+      $displays = array();
+      $i = 0;
+      foreach ($get_tables as $display) {
+          $displays[$i]['id'] = $display->id;
+          $displays[$i]['name'] = $display->name;
+          $i++;
+      }
+      //--------
+      ////-- Get the Groups list
+      $table = 'wpds_group_displays';
+      $get_tables = $wpdb->get_results("SELECT * FROM $table WHERE status='active'");
+      $groups = array();
+      $i = 0;
+      foreach ($get_tables as $group) {
+          $groups[$i]['id'] = $group->id;
+          $groups[$i]['groups_name'] = $group->group_name;
+          $i++;
+      }
+      //--------
+      $edit_always_on = FALSE;
+      if (isset($_GET['edit_alert']) && $_GET['edit_alert'] != '0') {
+          $table_name = "wpds_alerts";
+          $id = $_GET['edit_alert'];
+          $edit_data = $wpdb->get_results("SELECT * FROM $table_name WHERE id=$id");
+          echo "0000000000000000000000";
+          var_dump($edit_data);
+          $display_ids = unserialize($edit_data[0]->displays);
+          if ($edit_data[0]->time_from == '0000-00-00 00:00:00' && $edit_data[0]->time_to == '0000-00-00 00:00:00') {
+              $edit_always_on = TRUE;
+              $edit_data[0]->time_from = '';
+              $edit_data[0]->time_to = '';
+          } else {
+              $edit_always_on = FALSE;
+          }
+      }
+      ?>
+      <div class="wrap">
+          <h2>Add New Alert</h2>
+
+          <form method="post" action="">
+              <?php settings_fields('wpds_display_group'); ?>
+              <?php do_settings_sections('wpds_display_group'); ?>
+              <table class="form-table">
+                      <tr valign="top">
+                      <th scope="row">Run Time (From - To)</th>
+                      <td style="width: 18%; max-width: 192px;"><input type="text"  data-date-format="mm-dd-yyyy hh:ii:ss" id="dpd1" name="time_from" value="<?php echo $edit_data[0]->time_from; ?>" <?php
+                          if ($edit_always_on) {
+                              echo "disabled";
+                          }
+                          ?>/></td>
+                      <td><input type="text" class="span2" data-date-format="mm-dd-yyyy hh:ii:ss" id="dpd2" name="time_to" value="<?php echo $edit_data[0]->time_to; ?>" <?php
+                          if ($edit_always_on) {
+                              echo "disabled";
+                          }
+                          ?>/></td>
+                  </tr>
+                  <tr>  <th style="padding: 0%" scope="row"></th><td style="padding: 0px; padding-left: 1%;"><input type="checkbox" id="always_time" name="time_always" value="checked" <?php
+                          if ($edit_always_on) {
+                              echo "checked";
+                          }
+                          ?>>Always On</td></tr>
+
+                  <tr valign="top">
+                      <th scope="row">Displays</th>
+                      <td>
+                          Displays : <br />
+                          <?php foreach ($displays as $display) { ?>
+                              <input type='checkbox' name='displays_selected[]' value='<?php echo $display['id']; ?>' <?php
+                              if (isset($_GET['edit_alert'])) {
+                                  if ((array_search($display['id'], $display_ids) !== false))
+                                      echo "checked";
+                              }
+                              ?>/><?php echo $display['name']; ?><br />
+                          <?php } ?><br />Groups : <br />
+                          <?php foreach ($groups as $group) { ?>
+                              <input type='checkbox' name='displays_selected[]' value='gr_<?php echo $group['id']; ?>' <?php
+                              if (isset($_GET['edit_alert'])) {
+                                  if ((array_search('gr_' . $group['id'], $display_ids) !== false))
+                                      echo "checked";
+                              }
+                              ?>/><?php echo $group['groups_name']; ?><br />
+                                 <?php } ?>
+                      </td>
+                  </tr>
+
+                  <tr valign="top">
+                      <th scope="row">Email ID</th>
+                      <td><input type="text" name="email_id"  value="<?php echo $edit_data[0]->name; ?>"/></td>
+                  </tr>
+              </table>
+
+              <?php
+              if (isset($_GET['edit_alert'])) {
+                  submit_button("Edit Alert");
+              } else {
+                  submit_button("Create Alert");
+              }
+              ?>
+
+          </form>
+      </div> <?php
+    }
+
+
+    if (!(empty($_POST['s']))) {
+
+
+        function filter_where($where = '') {
+
+            $title = $_POST['s'];
+            $where .= "AND post_title LIKE '%$title%' OR post_content LIKE '%$title%'";
+            return $where;
+        }
+
+        add_filter('posts_where', 'filter_where');
+
+        $customPosts = new WP_Query();
+    }
+    if ($current_user->caps['administrator'] == '1')
+        $customPosts->query('posts_per_page=-1');
+    else
+        $customPosts->query('&author=' . $current_user->ID . '&posts_per_page=-1');
+    remove_filter('posts_join', 'get_custom_field_posts_join');
+    remove_filter('posts_groupby', 'get_custom_field_posts_group');
+    $arr = array();
+    $a = array();
+    $i = 0;
+    // Get Displays from DB
+    $table_name = "wpds_alerts";
+    $retrieve_data = $wpdb->get_results("SELECT * FROM $table_name");
+    // Prepare array to show all the diplays
+    foreach ($retrieve_data as $data) {
+        $a[$i]['id'] = $data->id;
+        $a[$i]['display_id'] = $data->display_id;
+        $a[$i]['time_from'] = $data->time_from;
+        $a[$i]['time_to'] = $data->time_to;
+        $a[$i]['email_id'] = $data->email_id;
+        $serialize_check = @unserialize($data->displays);
+        if ($serialize_check !== false) {
+            $unserialize_display = unserialize($data->displays);
+            $display_name_array = wpds_get_display_name($unserialize_display);
+            $a[$i]['displays'] = implode(' ,', $display_name_array);
+        } else {
+            $a[$i]['displays'] = $data->displays;
+        }
+        if ($a[$i]['time_from'] == '0000-00-00 00:00:00' && $a[$i]['time_to'] == '0000-00-00 00:00:00') {
+            $a[$i]['time'] = 'Always On';
+        } else {
+            $date_from = new DateTime($a[$i]['time_from']);
+            $a[$i]['time_from'] = $date_from->format('dS F o');
+            $date_to = new DateTime($a[$i]['time_to']);
+            $a[$i]['time_to'] = $date_to->format('dS F o');
+            $a[$i]['time'] = $a[$i]['time_from'] . ' to ' . $a[$i]['time_to'];
+        }
+
+        $i++;
+    }
+  if(!(isset($_GET['new_al']))) {
+    include_once (plugin_dir_path(__FILE__) . 'list_alerts.php');       //  table head to display list of videos
+  }
+  wp_reset_query();
+}
+
+
+
 $height = 500;
 $width = 800;
 /*

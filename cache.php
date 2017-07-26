@@ -1,4 +1,5 @@
 <?php
+echo plugin_dir_path(__FILE__);
 
 $domain = $argv[1];
 $ur = explode('api-get-slider',$domain);

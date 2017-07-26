@@ -10,7 +10,6 @@
  */
 
 include_once (plugin_dir_path(__FILE__) . 'wp_database_table.php');
-//add_action('activated_plugin','myplugin_activate')
 if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly
 }
@@ -461,15 +460,19 @@ if (isset($_GET['page'])) {
                 $fm_name = $_FILES['floormap']['name'];
             } else{
                 if($_POST['submit'] == 'Add FloorMap'){
+                  if($_POST['name']=='') {
                      function admin_notice_fail() { ?>
                     <div class="notice notice-error is-dismissible">
                         <p><?php _e('Error ! FloorMap not created. Please fill all the fields of the form!', 'sample-text-domain'); ?></p>
                     </div>
                     <?php }
+
                 add_action('admin_notices', 'admin_notice_fail');
+              }
                 $create = false;
                 }
             }
+            if(!($_POST['name']=='')) {
             global $wpdb;
             if (isset($_GET['edit_floormap']) && $_GET['edit_floormap'] != '') {
                 $fm_id = $_GET['edit_floormap'];
@@ -509,7 +512,92 @@ if (isset($_GET['page'])) {
                 }
             }
           }
+        }
             add_action('admin_notices', 'admin_notice_success');
+    }
+
+//-- NEW ALERTS form submitted
+    else if ($_GET['page'] == 'wpds_alerts') {
+        // Check if Form submited for new display and editted display
+        if ($_POST['submit'] == 'Create Alert' || $_POST['submit'] == 'Edit Alert') {
+            if ($_POST['email_id'] == '' || !(isset($_POST['displays_selected']))) {
+                /*
+                * Function to display the error message
+                */
+                function admin_notice_fail() {
+                    ?>
+                    <div class="notice notice-error is-dismissible">
+                        <p><?php _e('Error ! Alert not added. Please fill all the fields of the form!', 'sample-text-domain'); ?></p>
+                    </div>
+                    <?php
+                }
+
+                add_action('admin_notices', 'admin_notice_fail');
+            } else {
+                global $wpdb;
+                $table_name = "wpds_alerts";
+                //$display_id = $_POST['display_id'];
+                if (isset($_POST['time_always'])) {
+                    $time_to = "0000-00-00 00:00:00";
+                    $time_from = "0000-00-00 00:00:00";
+                } else if (isset($_POST['time_from']) && isset($_POST['time_to'])) {
+                    $time_from = $_POST['time_from'];
+                    $time_to = $_POST['time_to'];
+                }
+                $displays = serialize($_POST['displays_selected']);
+                $email_id = $_POST['email_id'];
+                $display=unserialize($displays);
+
+                //var_dump($displays);
+                $i=0;
+                while($display[$i]!='')
+                {
+                  if($display_id == '') {
+                  $display_id = "$display_id" . "$display[$i]";
+                }
+                else {
+                $display_id = "$display_id" . "," . "$display[$i]";
+              }
+                $i++;
+              }
+
+
+                // ---- CHeck if display is being editted ----
+                if (isset($_GET['edit_alert']) && $_GET['edit_alert'] != '') {
+                    $wpdb->update($table_name, array('display_id' => $display_id, 'time_from' => $time_from, 'time_to' => $time_to, 'email_id' => $email_id), array('id' => $_GET['edit_alert']));
+                } else {
+                    $wpdb->insert($table_name, array('display_id' => $display_id, 'time_from' => $time_from, 'time_to' => $time_to, 'email_id' => $email_id));
+                }
+            /*
+            * Function to display the success message
+            */
+            function admin_notice_success() {
+                ?>
+                <?php
+                $page = $_GET['page'];
+                $check_page = substr($page, 0, 8);
+                if (($check_page == 'wpds_add' || $check_page =='wpds_flo') && isset($_POST['submit'])) { // checking the condition for the success
+                    ?>
+                    <div class="notice notice-success is-dismissible">
+                        <p>
+                            <?php
+                            if($check_page == 'wpds_flo')
+                                $page_type = 'FloorMaps';
+                            else
+                                $page_type = ucwords(substr($page, 9));
+                            if ((isset($_GET['edit_display']) && $_GET['edit_display'] != '') || (isset($_GET['edit_group']) && $_GET['edit_group'] != '') || (isset($_GET['edit_event']) && $_GET['edit_event'] != '')) {
+                                _e("$page_type editted succesfully!", 'sample-text-domain'); // display message for editing succesfully
+                            } else {
+                                _e("$page_type added succesfully!", 'sample-text-domain'); // display message for adding succesfully
+                            }
+                            ?></p>
+                    </div>
+                    <?php
+                }
+            }
+          }
+            add_action('admin_notices', 'admin_notice_success');
+        }
     }
 }
 
