@@ -741,13 +741,11 @@ function wpds_alerts() {
       }
       //--------
       $edit_always_on = FALSE;
-      if (isset($_GET['edit_alert']) && $_GET['edit_alert'] != '0') {
+      if (isset($_GET['edit_alert']) && $_GET['edit_alert'] != '') {
           $table_name = "wpds_alerts";
           $id = $_GET['edit_alert'];
-          $edit_data = $wpdb->get_results("SELECT * FROM $table_name WHERE id=$id");
-          echo "0000000000000000000000";
-          var_dump($edit_data);
-          $display_ids = unserialize($edit_data[0]->displays);
+          $edit_data = $wpdb->get_results("SELECT * FROM $table_name WHERE id = $id");
+          $display_ids = unserialize($edit_data[0]->display_id);
           if ($edit_data[0]->time_from == '0000-00-00 00:00:00' && $edit_data[0]->time_to == '0000-00-00 00:00:00') {
               $edit_always_on = TRUE;
               $edit_data[0]->time_from = '';
@@ -755,6 +753,7 @@ function wpds_alerts() {
           } else {
               $edit_always_on = FALSE;
           }
+          //var_dump($edit_data);
       }
       ?>
       <div class="wrap">
@@ -808,7 +807,7 @@ function wpds_alerts() {
 
                   <tr valign="top">
                       <th scope="row">Email ID</th>
-                      <td><input type="text" name="email_id"  value="<?php echo $edit_data[0]->name; ?>"/></td>
+                      <td><input type="email" name="email_id"  value="<?php echo $edit_data[0]->email_id; ?>"/></td>
                   </tr>
               </table>
 
@@ -858,13 +857,13 @@ function wpds_alerts() {
         $a[$i]['time_from'] = $data->time_from;
         $a[$i]['time_to'] = $data->time_to;
         $a[$i]['email_id'] = $data->email_id;
-        $serialize_check = @unserialize($data->displays);
+        $serialize_check = @unserialize($data->display_id);
         if ($serialize_check !== false) {
-            $unserialize_display = unserialize($data->displays);
-            $display_name_array = wpds_get_display_name($unserialize_display);
-            $a[$i]['displays'] = implode(' ,', $display_name_array);
+            $unserialize_display = unserialize($data->display_id);
+            $display_name_array = wpds_get_display_id($unserialize_display);
+            $a[$i]['display_id'] = implode(' ,', $display_name_array);
         } else {
-            $a[$i]['displays'] = $data->displays;
+            $a[$i]['display_id'] = $data->display_id;
         }
         if ($a[$i]['time_from'] == '0000-00-00 00:00:00' && $a[$i]['time_to'] == '0000-00-00 00:00:00') {
             $a[$i]['time'] = 'Always On';

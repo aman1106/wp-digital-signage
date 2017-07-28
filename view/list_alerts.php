@@ -43,10 +43,10 @@ class My_List_Table extends WP_List_Table {
     function process_bulk_action() {
 
         if ('delete' === $this->current_action()) {
-            foreach ($_POST['display'] as $display) {
+            foreach ($_POST['alert'] as $alert) {
                 global $wpdb;
                 //deleting selected display from the table
-                $delete = $wpdb->delete("wpds_alerts", array('id' => $display));
+                $delete = $wpdb->delete("wpds_alerts", array('id' => $alert));
                 if (!$delete) {
                     ?>
                     <div class="notice notice-error is-dismissible">
@@ -56,7 +56,7 @@ class My_List_Table extends WP_List_Table {
                 } else if ($delete > 0) {
                     ?>
                     <div class="notice notice-success is-dismissible">
-                        <p><?php _e('Successfully deleted ' . $delete . ' displays', 'sample-text-domain'); ?></p>
+                        <p><?php _e('Successfully deleted ' . $delete . ' alerts', 'sample-text-domain'); ?></p>
                     </div>
                     <?php
                 }

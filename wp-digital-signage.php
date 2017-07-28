@@ -173,7 +173,7 @@ if (isset($_GET['page'])) {
       $results[$i] = serialize($result);
       // updating table after deletion
       $wpdb->query("UPDATE wpds_group_displays SET display = '$results[$i]' WHERE display LIKE '%\"$del1\"%' LIMIT 1");
-      $i=$i+1;
+      $i++;
     }
       // deleting display from the corresponding events
       $i=0;
@@ -191,6 +191,24 @@ if (isset($_GET['page'])) {
     $wpdb->query("UPDATE wpds_events SET displays = '$results[$i]' WHERE displays LIKE '%\"$del1\"%' LIMIT 1");
     $i++;
   }
+  // deleting display from the corresponding events
+        $i=0;
+        $del = $_GET['del_display'];
+        $results =  $wpdb->get_results("SELECT display_id FROM wpds_alerts");
+        //var_dump($results);
+        while($results[$i]->display_id !='') {
+          $del = $_GET['del_display'];
+          $result=unserialize($results[$i]->display_id);
+          //var_dump($result);
+          if (($del = array_search($del, $result)) !== false) {
+            $del1 = $result[$del];
+            unset($result[$del]);
+          }
+          $results[$i] = serialize($result);
+          // updating table after deletion
+          $wpdb->query("UPDATE wpds_alerts SET display_id = '$results[$i]' WHERE display_id LIKE '%\"$del1\"%' LIMIT 1");
+          $i++;
+        }
   }
 }
 //-- NEW DISPLAY form submitted
@@ -294,8 +312,22 @@ if (isset($_GET['page'])) {
       $wpdb->query("UPDATE wpds_events SET displays = '$results[$i]' WHERE displays LIKE '%\"$del1\"%' LIMIT 1");
       $i++;
     }
+        $results = $wpdb->get_results("SELECT display_id FROM wpds_alerts");
+        $i=0;
+        while($results[$i]->display_id !='') {
+          $del = "gr_" . $_GET['del_group'];
+          $result=unserialize($results[$i]->display_id);
+          if (($del = array_search($del, $result)) !== false) {
+            $del1 = $result[$del];
+            unset($result[$del]);
+          }
+          $results[$i] = serialize($result);
+          // updating the alerts table
+          $wpdb->query("UPDATE wpds_alerts SET display_id = '$results[$i]' WHERE display_id LIKE '%\"$del1\"%' LIMIT 1");
+          $i++;
+        }
+      }
   }
-}
 //--- NEW / EDIT GROUP form submitted
     else if ($_GET['page'] == 'wpds_add_group') {
         // Check if Form submited for new display and editted display
@@ -445,8 +477,7 @@ if (isset($_GET['page'])) {
         //updating the corresponding display in the display table
         $results = $wpdb->query("UPDATE wpds_displays SET floormap = '0' WHERE floormap LIKE \"$a\"");
       }
-              if ($_GET['new_fm'] == 'true' && ($_POST['submit'] == 'Add FloorMap' || $_POST['submit'] == 'Edit FloorMap')) {
-
+      if($_GET['new_fm'] == 'true' && ($_POST['submit'] == 'Add FloorMap' || $_POST['submit'] == 'Edit FloorMap')) {
             $table_name = 'wpds_floormaps';
             $name = $_POST['name'];
             $floormap = $_POST['floormap'];
@@ -518,6 +549,15 @@ if (isset($_GET['page'])) {
 
 //-- NEW ALERTS form submitted
     else if ($_GET['page'] == 'wpds_alerts') {
+
+        if(isset($_GET['del_alert']) && $_GET['del_alert'] != '') {
+          //deleting event from the table
+          global $wpdb;
+          $table_name = "wpds_alerts";
+          $wpdb->delete($table_name, array('id' => $_GET['del_alert']));
+        }
+
+
         // Check if Form submited for new display and editted display
         if ($_POST['submit'] == 'Create Alert' || $_POST['submit'] == 'Edit Alert') {
             if ($_POST['email_id'] == '' || !(isset($_POST['displays_selected']))) {
@@ -533,10 +573,10 @@ if (isset($_GET['page'])) {
                 }
 
                 add_action('admin_notices', 'admin_notice_fail');
-            } else {
+            }
+            else {
                 global $wpdb;
                 $table_name = "wpds_alerts";
-                //$display_id = $_POST['display_id'];
                 if (isset($_POST['time_always'])) {
                     $time_to = "0000-00-00 00:00:00";
                     $time_from = "0000-00-00 00:00:00";
@@ -544,26 +584,11 @@ if (isset($_GET['page'])) {
                     $time_from = $_POST['time_from'];
                     $time_to = $_POST['time_to'];
                 }
-                $displays = serialize($_POST['displays_selected']);
+                $display_id = serialize($_POST['displays_selected']);
                 $email_id = $_POST['email_id'];
-                $display=unserialize($displays);
-
-                //var_dump($displays);
-                $i=0;
-                while($display[$i]!='')
-                {
-                  if($display_id == '') {
-                  $display_id = "$display_id" . "$display[$i]";
-                }
-                else {
-                $display_id = "$display_id" . "," . "$display[$i]";
-              }
-                $i++;
-              }
-
 
                 // ---- CHeck if display is being editted ----
-                if (isset($_GET['edit_alert']) && $_GET['edit_alert'] != '') {
+                if (isset($_GET['edit_alert']) && $_GET['edit_alert'] != '' && $_POST['submit'] == 'Edit Alert') {
                     $wpdb->update($table_name, array('display_id' => $display_id, 'time_from' => $time_from, 'time_to' => $time_to, 'email_id' => $email_id), array('id' => $_GET['edit_alert']));
                 } else {
                     $wpdb->insert($table_name, array('display_id' => $display_id, 'time_from' => $time_from, 'time_to' => $time_to, 'email_id' => $email_id));
@@ -576,16 +601,16 @@ if (isset($_GET['page'])) {
                 <?php
                 $page = $_GET['page'];
                 $check_page = substr($page, 0, 8);
-                if (($check_page == 'wpds_add' || $check_page =='wpds_flo') && isset($_POST['submit'])) { // checking the condition for the success
+                if (($check_page == 'wpds_add' || $check_page == 'wpds_ale') && isset($_POST['submit'])) { // checking the condition for the success
                     ?>
                     <div class="notice notice-success is-dismissible">
                         <p>
                             <?php
-                            if($check_page == 'wpds_flo')
-                                $page_type = 'FloorMaps';
+                            if($check_page == 'wpds_ale')
+                                 $page_type = 'Alert';
                             else
                                 $page_type = ucwords(substr($page, 9));
-                            if ((isset($_GET['edit_display']) && $_GET['edit_display'] != '') || (isset($_GET['edit_group']) && $_GET['edit_group'] != '') || (isset($_GET['edit_event']) && $_GET['edit_event'] != '')) {
+                            if ((isset($_GET['new_al']) && $_GET['new_al'] == true) && (isset($_GET['edit_alert']) && $_GET['edit_alert'] != '')) {
                                 _e("$page_type editted succesfully!", 'sample-text-domain'); // display message for editing succesfully
                             } else {
                                 _e("$page_type added succesfully!", 'sample-text-domain'); // display message for adding succesfully

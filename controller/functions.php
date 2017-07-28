@@ -2,13 +2,13 @@
 
 //--- Load JS and CSS files for the plugin
 function wpds_enqueue_script() {
-    wp_register_script('datetime-js', plugins_url('/js/foundation-datepicker.js', __FILE__));
-    wp_register_script('datetime-js-min', plugins_url('/js/foundation-datepicker.min.js', __FILE__));
+    wp_register_script('datetime-js', plugins_url('/assets/js/foundation-datepicker.js', plugin_dir_path(__FILE__)));
+    wp_register_script('datetime-js-min', plugins_url('assets/js/foundation-datepicker.min.js', plugin_dir_path(__FILE__)));
     wp_enqueue_script('jquery');
     //- FOR DateTime drop down
     wp_enqueue_script('datetime-js');
     wp_enqueue_script('datetime-js-min');
-    wp_register_style('datetime-css', plugins_url('/css/foundation-datepicker.css', __FILE__));
+    wp_register_style('datetime-css', plugins_url('/assets/css/foundation-datepicker.css', plugin_dir_path(__FILE__)));
     wp_enqueue_style('datetime-css');
 }
 
@@ -150,4 +150,24 @@ function wpds_get_display_name($id_array) {
         $i++;
     }
     return $display_names;
+}
+function wpds_get_display_id($id_array) {
+    global $wpdb;
+    $table_name = 'wpds_displays';
+    $table_name_gr = 'wpds_group_displays';
+    $i = 0;
+    foreach ($id_array as $id) {
+        if (strstr($id, 'gr_') != FALSE) {
+            $id = substr($id, 3);
+            // Selecting group name from the table wpds_group_displays
+            $get_gr_id = $wpdb->get_results("SELECT id FROM $table_name_gr WHERE id = '$id'");
+            $display_id[$i] = $get_gr_id[0]->id . ' (Group)';
+        } else {
+            // Selecting display name from the table wpds displays
+            $get_id = $wpdb->get_results("SELECT id FROM $table_name WHERE id = '$id'");
+            $display_id[$i] = $get_id[0]->id;
+        }
+        $i++;
+    }
+    return $display_id;
 }
