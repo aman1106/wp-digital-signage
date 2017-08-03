@@ -18,7 +18,7 @@ class My_List_Table extends WP_List_Table {
         $columns = array(
             'cb' => '<input type="checkbox" />',
             'id' => 'ID',
-            'display_id' => 'Display Id',
+            'display_id' => 'Displays',
             'time' => 'Running on',
             'email_id' => 'Email Id',
         );

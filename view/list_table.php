@@ -22,6 +22,9 @@ class My_List_Table extends WP_List_Table {
             'location' => 'Location',
             'mac' => 'Mac',
             'status' => 'Status',
+            /*'upstatus' => 'Upstatus',
+            'uptime' => 'Uptime',
+            'last_seen' => 'Last Seen'*/
         );
         return $columns;
     }
@@ -163,5 +166,5 @@ $myListTable->prepare_items_wpds($a);
 
 <?php $myListTable->display(); ?>
 </form><?php
-echo '</div>';
+echo '</div>';z
 ?>

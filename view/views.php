@@ -179,7 +179,7 @@ function wpds_floormaps() {
 }
 
 /*
-  Menu page add new / edit display
+  Menu page add new and edit display
  */
 
 function wpds_add_display() {
@@ -705,7 +705,11 @@ function wpds_add_event() {
         </form>
     </div> <?php
 }
-
+/*
+*
+* Function to manage alerts, add and edit alerts
+*
+*/
 function wpds_alerts() {
     global $wpdb;
     global $customFields;
@@ -753,7 +757,6 @@ function wpds_alerts() {
           } else {
               $edit_always_on = FALSE;
           }
-          //var_dump($edit_data);
       }
       ?>
       <div class="wrap">
@@ -860,7 +863,7 @@ function wpds_alerts() {
         $serialize_check = @unserialize($data->display_id);
         if ($serialize_check !== false) {
             $unserialize_display = unserialize($data->display_id);
-            $display_name_array = wpds_get_display_id($unserialize_display);
+            $display_name_array = wpds_get_display_name($unserialize_display);
             $a[$i]['display_id'] = implode(' ,', $display_name_array);
         } else {
             $a[$i]['display_id'] = $data->display_id;

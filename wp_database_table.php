@@ -1,8 +1,10 @@
 <?php
 
 /**
+*
 * function to create database tables when plugin is activated
-*/
+*
+ */
 function wp_database_table() {
     global $wpdb;
     $table_name=$wpdb->prefix."wpds_display";
@@ -23,6 +25,9 @@ function wp_database_table() {
  `lat` int(11) NOT NULL DEFAULT '0',
  `lng` int(11) NOT NULL DEFAULT '0',
  `status` enum('active','disabled') COLLATE utf8_unicode_ci DEFAULT 'active',
+ `uptime_status` enum('1','0') COLLATE utf8_unicode_ci DEFAULT '0',
+ `uptime` int(40) unsigned DEFAULT NULL,
+ `last_seen` timestamp CURRENT_TIMESTAMP
  PRIMARY KEY (`id`)
 ) $charset_collate;";
     //including file upgrade.php
@@ -115,7 +120,7 @@ if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name) {
   //create table for wpds_alerts
   $sql = "CREATE TABLE `wpds_alerts` (
 `id` int(9) unsigned NOT NULL AUTO_INCREMENT,
-`display_id` varchar(40) COLLATE utf8_unicode_ci NOT NULL,
+`display_id` varchar(80) COLLATE utf8_unicode_ci NOT NULL,
 `time_from` datetime DEFAULT NULL,
 `time_to` datetime DEFAULT NULL,
 `email_id` varchar(80) COLLATE utf8_unicode_ci NOT NULL,

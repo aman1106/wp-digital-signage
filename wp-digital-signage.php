@@ -10,6 +10,7 @@
  */
 
 include_once (plugin_dir_path(__FILE__) . 'wp_database_table.php');
+include_once (plugin_dir_path(__FILE__) . 'cron.php');
 if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly
 }
@@ -48,7 +49,8 @@ class Wpds_Endpoints {
      * Add query variables
      */
     public static function add_query_vars($vars) {
-        $vars[] = 'wpds_display';
+        $vars[0] = 'wpds_display';
+        $vars[1] = 'up_time';
         return $vars;
     }
 
@@ -57,8 +59,9 @@ class Wpds_Endpoints {
      */
     public static function handle_endpoint() {
         global $wp;
-        if (!empty($_GET['uid'])) {
+        if (!empty($_GET['uid']) && !empty($_GET['uptime'])) {
             $wp->query_vars['wpds_display'] = $_GET['uid'];
+            $wp->query_vars['up_time'] = $_GET['uptime'];
             do_action('wpds_action_display');
             die();
         }
@@ -75,9 +78,11 @@ class Wpds_Endpoints {
     public static function get_display() {
         global $wpdb, $wp;
         $display_mac = $wp->query_vars['wpds_display'];
+        $uptime = $wp->query_vars['up_time'];
         // Selecting data from the wpds displays table
         $query = "select * from wpds_displays where mac = '$display_mac' AND status='active'";
         $result = $wpdb->get_results($query);
+        $wpdb->update('wpds_displays', array('uptime' => $uptime), array('mac' => $display_mac));
         //------FOUND DISPLAY
         if (count($result) > 0) {
             $display_id = $result[0]->id;
@@ -137,7 +142,9 @@ class Wpds_Endpoints {
 }
 
 add_action('cache_event' , 'create_cache_zip','10','2');
-//creating cache zip
+/**
+ *creating cache zip
+ */
 function create_cache_zip($url,$slider_alias){
   $path = plugin_dir_url(__FILE__);
   exec("/usr/bin/php ".$path."cache.php '".$url."' ".$slider_alias);
@@ -150,6 +157,7 @@ $api->init();
 */
 include_once (dirname(__FILE__) . '/controller/functions.php');
 include_once (dirname(__FILE__) . '/view/views.php');
+
 if (isset($_GET['page'])) {
     if ($_GET['page'] == 'wpds_display') {
       // deleting selected display
@@ -195,11 +203,9 @@ if (isset($_GET['page'])) {
         $i=0;
         $del = $_GET['del_display'];
         $results =  $wpdb->get_results("SELECT display_id FROM wpds_alerts");
-        //var_dump($results);
         while($results[$i]->display_id !='') {
           $del = $_GET['del_display'];
           $result=unserialize($results[$i]->display_id);
-          //var_dump($result);
           if (($del = array_search($del, $result)) !== false) {
             $del1 = $result[$del];
             unset($result[$del]);
@@ -333,7 +339,9 @@ if (isset($_GET['page'])) {
         // Check if Form submited for new display and editted display
         if ($_POST['submit'] == 'Create Group' || $_POST['submit'] == 'Edit Group') {
             if ($_POST['group_name'] == '') {
-
+                /*
+                 * Function to display the failure notice
+                 */
                 function admin_notice_fail() {
                     ?>
                     <div class="notice notice-error is-dismissible">
@@ -359,6 +367,9 @@ if (isset($_GET['page'])) {
                 } else {
                     $wpdb->insert($table_name, array('group_name' => $name, 'location' => $location, 'display' => $displays, 'status' => $status));
                 }
+                /*
+                * Function to display the success notice
+                */
                 function admin_notice_success() {
                     ?>
                     <?php
@@ -401,7 +412,9 @@ if (isset($_GET['page'])) {
         if ($_POST['submit'] == 'Create Event' || $_POST['submit'] == 'Edit Event') {
 
             if ($_POST['event_name'] == '' || !(isset($_POST['displays_selected']))) {
-
+                /*
+                * Fuction to display the failure notice
+                */
                 function admin_notice_fail() {
                     ?>
                     <div class="notice notice-error is-dismissible">
@@ -432,6 +445,9 @@ if (isset($_GET['page'])) {
                     $wpdb->insert($table_name, array('name' => $name, 'slider' => $event_slider, 'time_from' => $time_from, 'time_to' => $time_to, 'displays' => $displays, 'status' => $status));
                 }
                 // ----- Confirmation messages ----
+                /*
+                * Function to display the success message
+                */
                 function admin_notice_success() {
                     ?>
                     <?php
@@ -492,6 +508,9 @@ if (isset($_GET['page'])) {
             } else{
                 if($_POST['submit'] == 'Add FloorMap'){
                   if($_POST['name']=='') {
+                    /*
+                    * Fuction to display the failure notice
+                    */
                      function admin_notice_fail() { ?>
                     <div class="notice notice-error is-dismissible">
                         <p><?php _e('Error ! FloorMap not created. Please fill all the fields of the form!', 'sample-text-domain'); ?></p>
@@ -518,6 +537,9 @@ if (isset($_GET['page'])) {
                 sleep(3);
                 $wpdb->insert($table_name, array('name' => $name, 'floormap' => $fm_name, 'status' => $status));
             }
+            /*
+            * Function to display the success notice
+            */
             function admin_notice_success() {
                 ?>
                 <?php

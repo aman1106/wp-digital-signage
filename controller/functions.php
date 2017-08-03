@@ -149,25 +149,5 @@ function wpds_get_display_name($id_array) {
         }
         $i++;
     }
-    return $display_names;
-}
-function wpds_get_display_id($id_array) {
-    global $wpdb;
-    $table_name = 'wpds_displays';
-    $table_name_gr = 'wpds_group_displays';
-    $i = 0;
-    foreach ($id_array as $id) {
-        if (strstr($id, 'gr_') != FALSE) {
-            $id = substr($id, 3);
-            // Selecting group name from the table wpds_group_displays
-            $get_gr_id = $wpdb->get_results("SELECT id FROM $table_name_gr WHERE id = '$id'");
-            $display_id[$i] = $get_gr_id[0]->id . ' (Group)';
-        } else {
-            // Selecting display name from the table wpds displays
-            $get_id = $wpdb->get_results("SELECT id FROM $table_name WHERE id = '$id'");
-            $display_id[$i] = $get_id[0]->id;
-        }
-        $i++;
-    }
-    return $display_id;
+    return $display_names;  //returning the data
 }
