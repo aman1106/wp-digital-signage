@@ -1,0 +1,26 @@
+.. Example documentation master file, created by
+   sphinx-quickstart on Fri Aug  4 11:54:42 2017.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
+Wp-Digital-Signage
+===================
+This is a paragraph that contains `a link`_.
+
+.. toctree::
+   :maxdepth: 2
+   tutorials
+   project
+   code
+
+
+   :caption: Contents:
+
+
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`

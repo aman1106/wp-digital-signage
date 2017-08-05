@@ -9,8 +9,7 @@
  * License: GPL2
  */
 
-include_once (plugin_dir_path(__FILE__) . 'wp_database_table.php');
-include_once (plugin_dir_path(__FILE__) . 'cron.php');
+include_once (plugin_dir_path(__FILE__) . 'wp-database-table.php');
 if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly
 }

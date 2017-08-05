@@ -27,8 +27,6 @@
                 } $i++;
         }
       if($difference >= 10) {
-        //echo $email_to . "\n";
-        //echo $email_id . "\n";
         $headers = 'MIME-Version: 1.0' . "\r\n";
         $headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
         $headers .= 'From: admin <'."$email_id" .'>' . "\r\n";
@@ -38,7 +36,7 @@
         $wpdb->update('wpds_displays', array('upstatus' => 0), array('upstatus' => 1));
         }
         else {
-        echo "everything OK"."\n";
+        echo "Everything OK"."\n";
         }
 
      }
