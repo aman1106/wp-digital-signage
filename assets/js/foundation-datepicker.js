@@ -416,7 +416,7 @@
                 date = arguments[0];
                 fromArgs = true;
             }
-            else if (!currentVal && this.initialDate != null) { // If value is not set, set it to the initialDate 
+            else if (!currentVal && this.initialDate != null) { // If value is not set, set it to the initialDate
                 date = this.initialDate
             }
             else {
@@ -1080,7 +1080,7 @@
              Method show() does not set display css correctly and datepicker is not shown.
              Changed to .css('display', 'block') solve the problem.
              See https://github.com/vitalets/x-editable/issues/37
-             
+
              In jquery 1.7.2+ everything works fine.
              */
             //this.picker.find('>div').hide().filter('.datepicker-'+DPGlobal.modes[this.viewMode].clsName).show();
@@ -1422,7 +1422,7 @@ jQuery(document).ready(function () {
         format: 'yyyy-mm-dd hh:ii:ss',
         pickTime: true,
         onRender: function (date) {
-            return date.valueOf() <= checkin.date.valueOf() ? 'disabled' : '';
+            return date.valueOf() < checkin.date.valueOf() ? 'disabled' : '';
         }
     }).on('changeDate', function (ev) {
         //checkout.hide();
@@ -1442,14 +1442,14 @@ jQuery(document).ready(function () {
     });
 
 if(jQuery('#edit_flag').val()=='1'){
-    
+
     var val = jQuery('.fm_add').val();
         if (val == '0') {
             jQuery("#floormap").hide();
         }
         else {
-            
-            
+
+
             var map = L.map('floormap', {
                 crs: L.CRS.Simple,
                 attributionControl: false,
@@ -1457,7 +1457,7 @@ if(jQuery('#edit_flag').val()=='1'){
             });
 
             var imageUrl = site_url + '/wp-content/uploads/fm-' + val;
-      
+
             L.imageOverlay(imageUrl, new L.LatLngBounds([0, 0], [height / scale, width / scale]), {noWrap: true, maxZoom: 3, minZoom: 0}).addTo(map);
 
             map.setView(new L.LatLng( height / scale / 2, width / scale / 2), 0);
@@ -1480,9 +1480,9 @@ if(jQuery('#edit_flag').val()=='1'){
             var lat = jQuery('#lat').val();
             var lng = jQuery('#lng').val();
              var marker = L.marker([lat,lng], { icon:blue} ).addTo(map);
-            var markerT = L.marker([lat,lng] , { icon: L.divIcon({className: 'count-icon', html: "<div class='mtexts'>"+jQuery('#display_name').val()+"</div>",iconSize: [1, 1] }) }).addTo(map);  
-    
-            
+            var markerT = L.marker([lat,lng] , { icon: L.divIcon({className: 'count-icon', html: "<div class='mtexts'>"+jQuery('#display_name').val()+"</div>",iconSize: [1, 1] }) }).addTo(map);
+
+
             map.on('click', function (event) {
                // alert(event.latlng.lat);
                 //alert(event.latlng.lng);
@@ -1515,7 +1515,7 @@ if(jQuery('#edit_flag').val()=='1'){
             });
 
             var imageUrl = site_url + '/wp-content/uploads/fm-' + val;
-      
+
             L.imageOverlay(imageUrl, new L.LatLngBounds([0, 0], [height / scale, width / scale]), {noWrap: true, maxZoom: 3, minZoom: 0}).addTo(map);
 
             map.setView(new L.LatLng( height / scale / 2, width / scale / 2), 0);
