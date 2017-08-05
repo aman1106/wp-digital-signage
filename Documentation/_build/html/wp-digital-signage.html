@@ -1,0 +1,153 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="php">
+  <head>
+  <style>
+u {
+  text-decoration: underline;
+}
+
+</style>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Wp-Digital-Signage &#8212; Wp-Digital-Signage 0.1.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+
+
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+
+  <div class="section" id="wp-digital-signage">
+<h2><strong><u style="color:#800000">Wp-Digital-Signage</u></strong><a class="headerlink" href="#wp-digital-signage" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="description">
+<h3><strong><u>Description</u></strong><a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Site runs on server.</li>
+<li>App is installed on the device on which slider will be displayed.</li>
+<li>The device connect with the server and fetch the necessary information needed for running the slider on the device.</li>
+<li>The details of displays, group displays, events,floormaps and alerts are provided</li>
+<li>Display table contains the displays of the device on which slider will be running, and the details are display’s id, name, location, mac, status etc.</li>
+<li>Group displays contains the id of one or more displays. Grouping of the displays is done to avoid redundant settings.</li>
+<li>Event manager is another table which contains the names of displays and group displays, it manages the time of the displays and group displays i.e which display will run in what time period and between what days..etc</li>
+<li>Floormaps contains the name of the floormap and the image of the floormaps and the status of the floormap whether they are active or disabled.</li>
+<li>Alerts is the table which contains the ids of displays and group displays and the email address and it uses the crontab to check whether display is working properly or not, and if not then a mail is send to the email address which is linked with the particular display.</li>
+<li>One can add a new display, group, event, floormaps or alert, delete or edit the existing one.</li>
+</ul>
+</div>
+<div class="section" id="working">
+<h3><strong><u>Working</u></strong><a class="headerlink" href="#working" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Devices are registered with their mac address and the corresponding names on the server.</li>
+<li>An app is installed on the device which will automatically run when the device is on.</li>
+<li>The display fetches the corresponding information from the server and according to the slider name it fetches the images and displays the images on the screen between the given time.</li>
+<li>The sliders are decided for every display hence the slider according to the particular display will be displayed on the device screen.</li>
+<li>The device will run the slider and will generate the url which will contain the uid of the display and its uptime as query variables. This url is used to get the uptime of the display i.e the time since display is running.</li>
+<li>The query variables are used to notify if display is working or not.</li>
+<li>The uid and uptime is fetched and accordingly the upstatus of the display is set to 1 i.e the screen/display is working and last seen is set as per the current timestamp.</li>
+<li>It checks the last seen of the display and calculates the difference between the current time of the server and the last seen of the display and if the difference is above the certain time then a relevant message is sent.</li>
+<li>If device is not working i.e difference is above certain limit then it fetches the email id corresponding to that display to send the mail to the concerned person that particular display is not working.</li>
+<li>The upstatus of the display is again set to 0 as the display stopped working.</li>
+</ul>
+</div>
+<div class="section" id="modules">
+<h3><strong><u>Modules</u></strong><a class="headerlink" href="#modules" title="Permalink to this headline">¶</a></h3>
+<p>The modules of digital signage are as follows:</p>
+<p><u>Display</u> : The display module contains a list table in which it stored the details of the displays on which slider will run. The display table contains the id of the display which is auto incremented, the name of the display, location the display, mac address of the display to uniquely identify the display, status of the display i.e whether the display is active or disabled, uptime of the display which tells that since when the display is running in seconds, upstatus which tells whether the display is currently running or not, if running then upstatus will be 1, and 0 otherwise. One can also delete the particular display, edit it or create a new one by clicking on the corresponding button and giving the valid details which are needed.</p>
+<p><u>Group Display</u> : The group display module contains the group of the display which are grouped together to run same slider on every display on the group. The table consists of id which is again auto incremented, the group name, location of the displays, the name of the displays which are added in the group, and the status of the group i.e active or disabled. One can also delete the existing group, edit the group details or add a new group.</p>
+<p><u>Event Manager</u> : The Event Manager manages the displays and group displays according to the running time of the event. The Event Manager consists of the event table which has the fields id which contains the id of the Event which is auto incremented, name of the event, slider which tells which slider to run on particular displays and group displays, time from field stores the date and time from which display will be active, time to field stores the date and time till which display will be active, i.e display will be activated between ‘time from’ to ‘time to’, and status of the event which tells whether active or disabled.</p>
+<p><u>Floormaps</u> : Floormap module stores the map of the floor on which the display is to be displayed. The Floormap table contains the id field which contains the id of the floormap which is auto incremented, name field stored the name of the floormap, floormap field actually stores the floormaps and status field contains the current status of the floormap whether they are active or disabled.</p>
+<div class="toctree-wrapper compound">
+</div>
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></li>
+<li><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
+<li><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></li>
+</ul>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="#">Wp-Digital-Signage</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Aman Pandey.
+
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+
+      |
+      <a href="_sources/wp-digital-signage.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+
+
+
+  </body>
+</html>
